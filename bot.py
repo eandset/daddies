@@ -1,7 +1,9 @@
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.utils import get_random_id
 import logging
 import sys
+import json
 
 from config import config
 from handlers import MessageHandler
@@ -64,18 +66,64 @@ class EcoBot:
         print(f"🤖 {config.BOT_NAME}")
         print(f"📍 Версия: {config.BOT_VERSION}")
         print("=" * 60)
-        print("\nДля работы бота необходимо:")
-        print("1. ✅ Токен VK группы")
-        print("2. ✅ Включенный LongPoll API в настройках группы")
-        print("3. ✅ Разрешение на отправку сообщений")
-        print("\nСостояние:")
-        print(f"• Токен: {'✅ Установлен' if config.VK_TOKEN else '❌ Отсутствует'}")
-        print(f"• Режим: {'🔧 Отладка' if config.DEBUG else '🚀 Продакшн'}")
+        print("\n*Возможности геолокации:*")
+        print("✅ Прием геолокации через скрепку 📎")
+        print("✅ Поиск по адресу или названию места")
+        print("✅ Обработка кодов геолокации ВК")
+        print("✅ Интерактивные подсказки для пользователей")
+        print("\n*Отладка:* Включен режим логирования вложений")
         print("=" * 60)
         print("\nБот запущен! Ожидание сообщений...")
-        print("Напишите 'привет' в личные сообщения группы")
-        print("Для остановки нажмите Ctrl+C")
+        print("Пользователь может:")
+        print("1. Написать 'где я' для поиска по геолокации")
+        print("2. Отправить геолокацию через скрепку 📎")
+        print("3. Написать адрес для поиска")
         print("=" * 60 + "\n")
+
+    def send_message(self, user_id, text, keyboard=None, attachment=None):
+        """Отправляет сообщение пользователю"""
+        params = {
+            'user_id': user_id,
+            'message': text,
+            'random_id': get_random_id(),
+        }
+
+        if keyboard:
+            params['keyboard'] = keyboard
+
+        if attachment:
+            params['attachment'] = attachment
+
+        try:
+            self.vk_api.messages.send(**params)
+            logger.debug(f"Отправлено сообщение пользователю {user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка отправки сообщения: {e}")
+            return False
+
+    def _parse_attachments(self, event):
+        """Парсит вложения из события"""
+        attachments = None
+
+        try:
+            # Получаем raw данные события
+            event_dict = event.raw
+
+            # Ищем вложения в разных форматах
+            if 'attachments' in event_dict:
+                attachments = event_dict['attachments']
+            elif 'geo' in event_dict:
+                attachments = {'geo': event_dict['geo']}
+
+            # Логируем для отладки
+            if attachments:
+                logger.debug(f"Raw вложения из события: {attachments}")
+
+        except Exception as e:
+            logger.error(f"Ошибка парсинга вложений: {e}")
+
+        return attachments
 
     def run(self):
         """Запускает основной цикл бота"""
@@ -99,7 +147,10 @@ class EcoBot:
         user_id = event.user_id
         message = event.text.strip()
 
-        logger.info(f"Сообщение от {user_id}: {message}")
+        # Парсим вложения
+        attachments = self._parse_attachments(event)
+
+        logger.info(f"Сообщение от {user_id}: '{message}', вложения: {attachments}")
 
         try:
             # Получаем информацию о пользователе
@@ -107,18 +158,25 @@ class EcoBot:
             first_name = user_info.get('first_name', 'Пользователь')
             last_name = user_info.get('last_name', '')
 
-            # Обрабатываем сообщение
-            self.handler.handle_message(user_id, message, first_name, last_name)
+            # Обрабатываем сообщение через хендлер с вложениями
+            self.handler.handle_message(
+                user_id,
+                message,
+                first_name,
+                last_name,
+                attachments=attachments
+            )
 
         except vk_api.exceptions.ApiError as e:
             logger.error(f"Ошибка VK API: {e}")
-            self.handler.send_message(
+            self.send_message(
                 user_id,
                 "❌ Произошла ошибка при обработке запроса. Попробуйте позже."
             )
         except Exception as e:
             logger.error(f"Ошибка обработки сообщения: {e}")
-            self.handler.send_message(
+            logger.exception("Подробности ошибки:")
+            self.send_message(
                 user_id,
                 "😔 Произошла внутренняя ошибка. Администратор уже уведомлен."
             )
