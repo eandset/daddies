@@ -68,7 +68,7 @@ class CacheManager:
             if not await self.db.save_chat(chat):
                 status = False
 
-        if not self.db.save_tops(self.tops):
+        if not await self.db.save_tops(self.tops):
             status = False
 
         return status

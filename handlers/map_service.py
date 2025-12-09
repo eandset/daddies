@@ -43,7 +43,7 @@ async def show_recycling(message: Message, cache: CacheManager):
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    points = cache.get_or_create_points(user.location)
+    points = await cache.get_or_create_points(user.location)
     points = points['recycling']
 
     if not points:
@@ -67,7 +67,7 @@ async def show_events(message: Message, cache: CacheManager):
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    points = cache.get_or_create_points(user.location)
+    points = await cache.get_or_create_points(user.location)
     points = points['event']
 
     if not points:

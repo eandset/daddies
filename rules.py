@@ -10,3 +10,5 @@ class PayloadRule(ABCRule[MessageEvent]):
     async def check(self, event: MessageEvent) -> bool:
         # Проверяем, совпадает ли значение по указанному ключу
         return event.payload.get(self.payload_key) == self.payload_value
+    
+    

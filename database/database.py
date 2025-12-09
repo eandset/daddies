@@ -10,6 +10,7 @@ class Database:
         self.db_path = db_path
         self._create_table_users()
         self._create_table_chats()
+        self._create_table_tops()
 
     def _create_table_users(self):
         with sqlite3.connect(self.db_path) as conn:
@@ -20,9 +21,9 @@ class Database:
                     user_chats TEXT DEFAULT '[]',
                     preferences TEXT DEFAULT '{}',
                     location TEXT DEFAULT '',
-                    score INTEGET DEFAULT 0,
+                    score INTEGER DEFAULT 0,
                     today_done TEXT DEFAULT '{}',
-                    notification INTEGER DEFAULT 0,
+                    notification INTEGER DEFAULT 0
                 )
             ''')
             conn.commit()
@@ -37,7 +38,7 @@ class Database:
             ''')
             conn.commit()
 
-    def _init_table(self):
+    def _create_table_tops(self):
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS tops (
@@ -246,27 +247,26 @@ class Database:
 
                 return chats
             
-    def save_tops(self, new_list: list):
+    async def save_tops(self, new_list: list):
         """Сохранить лидеров по очкам в бд"""
-        with sqlite3.connect(self.db_path) as conn:
+        async with aiosqlite.connect(self.db_path) as conn:
             try:
                 json_data = json.dumps(new_list)
-                conn.execute('UPDATE tops SET user_ids = ? WHERE id = 1', (json_data,))
-                conn.commit()
+                await conn.execute('UPDATE tops SET user_ids = ? WHERE id = 1', (json_data,))
+                await conn.commit()
                 return True
             except Exception as e:
-                conn.rollback()
+                await conn.rollback()
                 return False
-    
-    def get_tops(self) -> list:
+
+    async def get_tops(self) -> list:
         """Получить текущий список user_ids."""
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute('SELECT user_ids FROM tops WHERE id = 1')
-            data = cursor.fetchone()
-            if not data:
-                return []
-            try:
-                return json.loads(data[0])
-            except (json.JSONDecodeError, TypeError):
-                # На случай, если в базе повреждённая строка
-                return []
+        async with aiosqlite.connect(self.db_path) as conn:  # Исправлено: aiosqlite вместо sqlite3
+            async with conn.execute('SELECT user_ids FROM tops WHERE id = 1') as cursor:
+                data = await cursor.fetchone()
+                if not data:
+                    return []
+                try:
+                    return json.loads(data[0])
+                except (json.JSONDecodeError, TypeError):
+                    return []

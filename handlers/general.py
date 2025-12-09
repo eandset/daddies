@@ -1,12 +1,13 @@
 import random
 
 from vkbottle.bot import BotLabeler, Message, Bot, MessageEvent
-from vkbottle import GroupEventType
+from vkbottle import GroupEventType, BaseStateGroup
 
 from database import Database, User
 from cachemanager import CacheManager
 from keyboards.key_builders import get_main_menu, get_name_accept
 from rules import PayloadRule
+
 
 bl = BotLabeler()
 
@@ -15,6 +16,9 @@ ECO_TIPS = [
     "Выключайте воду, когда чистите зубы. Это экономит до 10 литров в минуту!",
     "Сдавайте батарейки в специальные пункты приема, одна батарейка загрязняет 20 кв.м земли."
 ]
+
+class SuperStates(BaseStateGroup):
+    NAME_STATE = "write_name"
 
 
 @bl.message(text=["Начать", "Start", "Ку"])
@@ -36,7 +40,7 @@ async def start_handler(message: Message, cache: CacheManager, bot: Bot):
     await message.answer(text, keyboard=get_main_menu())
 
 
-@bl.message(state='write_name')
+@bl.message(state=SuperStates.NAME_STATE)
 async def write_name(message: Message, cache: CacheManager):
     name = message.text
     user_info = await message.get_user()
@@ -49,7 +53,7 @@ async def write_name(message: Message, cache: CacheManager):
 @bl.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent, PayloadRule('command', 'not_accept_name'))
 async def not_accept_name(event: MessageEvent, bot: Bot):
     text = 'Извини, не расслышал сразу. Повтори, пожалуйста'
-    await bot.state_dispenser.set(event.peer_id, 'write_name')
+    await bot.state_dispenser.set(event.peer_id, SuperStates.NAME_STATE)
     return await event.edit_message(text)
 
 
