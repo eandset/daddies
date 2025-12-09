@@ -14,13 +14,25 @@ class Preference:
 
 
 @dataclass
+class TodayDone:
+    eco_rec: bool = False
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'TodayDone':
+        """Создание TodayDone из словаря"""
+        return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
+
+
+@dataclass
 class User:
     user_id: Optional[int] = None
     user_name: Optional[str] = None
     user_chats: Set[int] = field(default_factory=set)
     preferences: Preference = field(default_factory=Preference)
     location: Optional[str] = None
-    notification: bool = True
+    score: int = 0
+    today_done: TodayDone = field(default=TodayDone)
+    notification: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         """Конвертация в словарь с поддержкой вложенных dataclasses"""
@@ -37,9 +49,12 @@ class User:
     @classmethod
     def from_dict(cls, data: dict) -> 'User':
         """Создание User из словаря"""
-        # Обрабатываем вложенный preference
+        # Обрабатываем вложения
         if 'preference' in data and isinstance(data['preference'], dict):
             data['preference'] = Preference.from_dict(data['preference'])
+
+        if 'today_done' in data and isinstance(data['today_done'], dict):
+            data['today_done'] = TodayDone.from_dict(data['today_done'])
 
         # Обрабатываем user_chats (может быть list в JSON)
         if 'user_chats' in data:

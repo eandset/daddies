@@ -1,31 +1,33 @@
 from vkbottle.bot import BotLabeler, Message
-from database.db import db
+from cachemanager import CacheManager
 
 bl = BotLabeler()
 
 
 @bl.message(text="👤 Профиль")
-async def profile_handler(message: Message):
-    user = await db.queries.get_user(db.conn, vk_id=message.from_id)
+async def profile_handler(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
 
     if not user:
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
     text = (
-        f"👤 Эко-профиль: {user['first_name']}\n"
-        f"⭐️ Очки кармы: {user['eco_points']}\n"
-        f"🏅 Звание: {user['eco_level']}"
+        f"👤 Эко-профиль: {user.user_name}\n"
+        f"⭐️ Очки кармы: {user.score}\n"
+        f"🏅 Звание: Активист"
     )
     await message.answer(text)
 
 
 @bl.message(text="🏆 Рейтинг")
-async def rating_handler(message: Message):
-    top_users = await db.queries.get_top_users(db.conn)
+async def rating_handler(message: Message, cache: CacheManager):
+    top_users = cache.get_tops()
 
     text = "🏆 Топ-10 Эко-активистов:\n"
     for i, u in enumerate(top_users, 1):
-        text += f"{i}. {u['first_name']} — {u['eco_points']} очков\n"
+        user = cache.get_user(u)
+        text += f"{i}. {user.user_name} — {user.score} очков\n"
 
     await message.answer(text)

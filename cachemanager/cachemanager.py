@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+import asyncio
+from typing import Dict, Optional, Any
 
 from database.database import Database
 from database.models import User, Chat
@@ -10,6 +11,10 @@ class CacheManager:
 
         self.users: Dict[int, User] = {}
         self.chats: Dict[int, Chat] = {}
+        self.tops: list = []
+        self.points: Dict[str, Any]
+
+        self.lock_points: Dict[str, asyncio.Lock] = {}
 
     def add_user(self, user: User) -> bool:
         self.users[user.user_id] = user
@@ -28,6 +33,29 @@ class CacheManager:
         if chat_id in self.chats:
             return self.chats[chat_id]
         return None
+    
+    def update_tops(self, user: User) -> bool:
+        topers = self.tops
+        for i, toper in enumerate(topers):
+            if self.get_user(toper).score < user.score:
+                topers.insert(i, user.user_id)
+                break
+        
+        self.tops = toper[:10]
+
+    def get_tops(self) -> list:
+        return self.tops
+
+    async def get_or_create_points(self, location: str):
+        if location not in self.points:
+            if location not in self.lock_points:
+                self.lock_points[location] = asyncio.Lock()
+
+            async with self.lock_points[location]:
+                if location not in self.points:
+                    pass # Вот тут добавить как мы определяем точки
+
+        return self.points[location]
 
     async def save_data_to_db(self) -> bool:
         status = True
@@ -40,10 +68,14 @@ class CacheManager:
             if not await self.db.save_chat(chat):
                 status = False
 
+        if not self.db.save_tops(self.tops):
+            status = False
+
         return status
 
     async def get_data_from_db(self) -> bool:
         self.chats = await self.db.get_all_chats()
         self.users = await self.db.get_all_users()
+        self.tops = await self.db.get_tops()
 
         return True
