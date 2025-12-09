@@ -1,7 +1,10 @@
-from vkbottle.bot import BotLabeler, Message
-from database.db import db
-from keyboards.key_builders import get_main_menu
 import random
+
+from vkbottle.bot import BotLabeler, Message
+
+from database import Database
+from cachemanager import CacheManager
+from keyboards.key_builders import get_main_menu
 
 bl = BotLabeler()
 
@@ -13,12 +16,13 @@ ECO_TIPS = [
 
 
 @bl.message(text=["Начать", "Start", "Ку"])
-async def start_handler(message: Message):
+async def start_handler(message: Message, cache: CacheManager):
     user_info = await message.get_user()
 
-    # Регистрация пользователя через aiosql
-    await db.queries.register_user(db.conn, vk_id=message.from_id, first_name=user_info.first_name)
-    await db.conn.commit()
+    # Регистрация пользователя
+    user = cache.get_user(user_info.id)
+    if not user:
+        pass
 
     text = (
         f"Привет, {user_info.first_name}! Я твой Экологический помощник. 🌿\n"

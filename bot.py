@@ -1,13 +1,17 @@
 import os
 import asyncio
+
 from vkbottle import Bot
-from database.db import db
+
+from database import Database
+from cachemanager import CacheManager
 
 # Импорт обработчиков
 from handlers import general, map_service, gamification
 
 # Вставьте ваш токен или используйте os.getenv("TOKEN")
 TOKEN = "vk1.a.e0gXIlAOeoDFpNkkUrnZEu2ctKjZbAowpZd8JoToQmRMO_xEluC9p7zdLzoVgjgLt5eh-E5LUzpwz3URFmVk41MqKMAZdBcw2BGRB1ltlPFf6mf6DP-KQOmarnRhrCKJxvpoYG2nFafCkFYI-BIciHbltJ8vO9yLEgouBaO6qUR3XseSFyTL8BpSZTW-VHISXwdvPf3J_85QFHwATCmUng"
+DB_PATH = "eco_bot.db"
 
 bot = Bot(token=TOKEN)
 
@@ -19,24 +23,34 @@ def setup_labelers():
     bot.labeler.load(gamification.bl)
 
 
-async def startup_task():
+async def startup_task(cache: CacheManager):
     """Действия при запуске бота"""
     print("🚀 Запуск Эко-бота...")
-    await db.connect()
+    await cache.get_data_from_db()
 
 
-async def shutdown_task():
+async def shutdown_task(cache: CacheManager):
     """Действия при остановке"""
     print("💤 Отключение...")
-    await db.close()
+    await cache.save_data_to_db()
 
 
 if __name__ == "__main__":
+    bot.labeler.vbml_ignore_case = True
+
+    # Создаём экземпляры ключевых классов
+    db = Database(DB_PATH)
+    cache = CacheManager(db)
+
+    # Даём хендлерам доступ к экземпляром классов
+    bot.labeler.custom_rules['db'] = db
+    bot.labeler.custom_rules['cache'] = cache
+
     setup_labelers()
 
     # Регистрируем хуки запуска/остановки лупа
-    bot.loop_wrapper.on_startup.append(startup_task())
-    bot.loop_wrapper.on_shutdown.append(shutdown_task())
+    bot.loop_wrapper.on_startup.append(startup_task(cache))
+    bot.loop_wrapper.on_shutdown.append(shutdown_task(cache))
 
     # Запуск поллинга
     bot.run_forever()

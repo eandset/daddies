@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from database.database import Database
 from database.models import User, Chat
@@ -11,21 +11,23 @@ class CacheManager:
         self.users: Dict[int, User] = {}
         self.chats: Dict[int, Chat] = {}
 
-        self.get_data_from_db()
-
     def add_user(self, user: User) -> bool:
         self.users[user.user_id] = user
         return True
 
-    def get_user(self, user_id: int) -> User:
-        return self.users[user_id]
+    def get_user(self, user_id: int) -> Optional[User]:
+        if user_id in self.users:
+            return self.users[user_id]
+        return None
 
     def add_chat(self, chat: Chat) -> bool:
         self.chats[chat.chat_id] = chat
         return True
 
-    def get_chat(self, chat_id: int) -> Chat:
-        return self.chats[chat_id]
+    def get_chat(self, chat_id: int) -> Optional[Chat]:
+        if chat_id in self.chats:
+            return self.chats[chat_id]
+        return None
 
     async def save_data_to_db(self) -> bool:
         status = True

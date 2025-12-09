@@ -55,7 +55,7 @@ class Database:
             await db.commit()
             return True
 
-    async def get_user(self, user_id: int, *fields: str) -> Union[Optional[Dict[str, Any], User]]:
+    async def get_user(self, user_id: int, *fields: str) -> Union[Optional[Dict[str, Any]], User]:
         """
         Получение данных пользователя в виде словаря
 
