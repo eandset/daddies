@@ -1,10 +1,4 @@
-vk_api>=11.9.0
-sqlalchemy>=2.0.0
-psycopg2-binary>=2.9.0  # для PostgreSQL
-python-dotenv>=1.0.0
-requests>=2.31.0
-
-
-geopy>=2.4.0
-
-
+vkbottle==4.3.11
+aiosql==3.4.1
+aiosqlite==0.17.0
+pydantic
