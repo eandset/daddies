@@ -121,6 +121,45 @@ class Database:
 
                 return data
 
+    async def get_all_users(self) -> Dict[int, User]:
+        """
+        Получить словарь всех пользователей.
+
+        Returns:
+            Словарь вида {user_id: User}
+        """
+        async with aiosqlite.connect(self.db_path) as db:
+            async with db.execute(
+                    "SELECT user_id, user_name, user_chats, preferences, location, notification, page FROM users"
+            ) as cursor:
+                users = {}
+
+                async for row in cursor:
+                    user_id, user_name, user_chats_json, prefs_json, location, notification, page = row
+
+                    # Десериализация JSON полей
+                    user_data = {
+                        'user_id': user_id,
+                        'user_name': user_name,
+                        'location': location,
+                        'notification': bool(notification),
+                        'page': bool(page)
+                    }
+
+                    try:
+                        user_data['user_chats'] = json.loads(user_chats_json) if user_chats_json else []
+                    except json.JSONDecodeError:
+                        user_data['user_chats'] = []
+
+                    try:
+                        user_data['preferences'] = json.loads(prefs_json) if prefs_json else {}
+                    except json.JSONDecodeError:
+                        user_data['preferences'] = {}
+
+                    users[user_id] = User.from_dict(user_data)
+
+                return users
+
     async def save_chat(self, chat: Chat):
         '''Обновить данные чата в бд'''
         async with aiosqlite.connect(self.db_path) as db:
@@ -152,3 +191,28 @@ class Database:
                     except json.JSONDecodeError:
                         return Chat(chat_id=chat_id, user_ids=set())
                 return None
+
+    async def get_all_chats(self) -> Dict[int, Chat]:
+        """
+        Получить словарь всех чатов.
+
+        Returns:
+            Словарь вида {chat_id: Chat}
+        """
+        async with aiosqlite.connect(self.db_path) as db:
+            async with db.execute(
+                    "SELECT chat_id, user_ids FROM chats"
+            ) as cursor:
+                chats = {}
+
+                async for row in cursor:
+                    chat_id, user_ids_json = row
+
+                    try:
+                        user_ids = json.loads(user_ids_json) if user_ids_json else []
+                    except json.JSONDecodeError:
+                        user_ids = []
+
+                    chats[chat_id] = Chat(chat_id, user_ids)
+
+                return chats

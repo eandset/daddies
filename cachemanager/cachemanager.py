@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any
+from typing import Dict
 
 from database.database import Database
 from database.models import User, Chat
@@ -10,6 +10,8 @@ class CacheManager:
 
         self.users: Dict[int, User] = {}
         self.chats: Dict[int, Chat] = {}
+
+        self.get_data_from_db()
 
     def add_user(self, user: User) -> bool:
         self.users[user.user_id] = user
@@ -39,5 +41,7 @@ class CacheManager:
         return status
 
     async def get_data_from_db(self) -> bool:
-        status = True
+        self.chats = await self.db.get_all_chats()
+        self.users = await self.db.get_all_users()
 
+        return True
