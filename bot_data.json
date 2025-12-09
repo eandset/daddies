@@ -1,0 +1,56 @@
+{
+  "users": {
+    "1067089510": {
+      "vk_id": 1067089510,
+      "first_name": "Daniel",
+      "last_name": "Podlipaev",
+      "city": "Москва",
+      "eco_score": 50,
+      "level": 1,
+      "registration_date": "09.12.2025 15:07",
+      "last_active": "09.12.2025 15:18",
+      "tips_viewed": 0,
+      "actions": [
+        {
+          "type": "start",
+          "points": 10,
+          "description": "Начал работу с ботом",
+          "timestamp": "09.12.2025 15:07:24"
+        },
+        {
+          "type": "start",
+          "points": 10,
+          "description": "Начал работу с ботом",
+          "timestamp": "09.12.2025 15:16:15"
+        },
+        {
+          "type": "set_city",
+          "points": 10,
+          "description": "Установлен город: По городу",
+          "timestamp": "09.12.2025 15:17:39"
+        },
+        {
+          "type": "set_city",
+          "points": 10,
+          "description": "Установлен город: Указать город",
+          "timestamp": "09.12.2025 15:17:50"
+        },
+        {
+          "type": "set_city",
+          "points": 10,
+          "description": "Установлен город: Москва",
+          "timestamp": "09.12.2025 15:18:20"
+        }
+      ],
+      "stats": {
+        "searches": 0,
+        "tips_viewed": 0,
+        "feedbacks": 0,
+        "events_viewed": 0,
+        "city_changes": 3
+      }
+    }
+  },
+  "feedbacks": [],
+  "last_update": "2025-12-09T15:18:20.786270"
+}

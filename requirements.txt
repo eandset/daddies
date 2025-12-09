@@ -1,0 +1,4 @@
+vkbottle==4.3.11
+aiosql==3.4.1
+aiosqlite==0.17.0
+pydantic
