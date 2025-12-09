@@ -7,30 +7,25 @@ def scrape_expomap_page(url):
     Функция для получения всех элементов cli-info со страницы expomap.ru
     """
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Linux Arch; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
 
     try:
         # Загружаем страницу
-        print(f"Загружаем страницу: {url}")
         response = requests.get(url, headers=headers, timeout=1000)
         response.raise_for_status()
 
-        # Создаем объект BeautifulSoup
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Находим все div с классом cli-info
         cli_info_elements = soup.find_all('div', class_='cli-info')
 
         print(f"Найдено {len(cli_info_elements)} элементов cli-info")
 
-        # Собираем данные в список словарей
         events_data = []
 
         for index, cli_info in enumerate(cli_info_elements, 1):
             event_data = {
                 'id': index,
-                'html': str(cli_info),  # Полный HTML элемента
                 'data': {}  # Структурированные данные
             }
 
@@ -86,6 +81,11 @@ def scrape_expomap_page(url):
             if stats_div:
                 event_data['data']['statistics'] = stats_div.get_text(strip=True)
 
+            # 7. Подробнее
+            sites = cli_info.find("a", class_="button icon-sm")
+            if sites:
+                event_data['data']['site'] = sites.get("href") 
+
             events_data.append(event_data)
 
         return events_data
@@ -108,16 +108,13 @@ def main():
     if events:
         print(f"\nУспешно получено {len(events)} событий")
 
-        # Выводим краткую информацию в консоль
         print("\nКраткая информация о событиях:")
-        for event in events[:3]:  # Показываем первые 3 события
+        for event in events:
             data = event['data']
             print(f"\n{event['id']}. {data.get('title', 'Нет заголовка')}")
             print(f"   Дата: {parse_date_string(data.get('date', 'Не указана'))}")
             print(f"   Место: {data.get('place', 'Не указано')}")
-
-        if len(events) > 3:
-            print(f"\n... и еще {len(events) - 3} событий")
+            print(f"   Ссылка: https://expomap.ru{data.get('site', 'Не указана')}")
 
 
 if __name__ == "__main__":
