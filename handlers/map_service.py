@@ -1,19 +1,55 @@
-from vkbottle.bot import BotLabeler, Message
-from database.db import db
-from keyboards.key_builders import get_map_filter_kb
+from vkbottle.bot import BotLabeler, Message, MessageEvent
+from vkbottle import GroupEventType
+
+from keyboards.key_builders import get_map_filter_kb, write_location
+from cachemanager import CacheManager
+from rules import PayloadRule
 
 bl = BotLabeler()
 
 
-@bl.message(text="🗺 Карта эко-точек")
-async def map_menu(message: Message):
+@bl.message(config=None, text="🗺 Карта эко-точек")
+async def map_menu(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+
+    if user.location:
+        await message.answer("Что ищем?", keyboard=get_map_filter_kb())
+    else:
+        await message.answer('Необходимо обновить местоположение', keyboard=write_location())
+
+
+@bl.message(config=None, text='Обновить')
+async def write_loc(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user or not user.location:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+
+    location = None # Определите локу
+
+    user.location = location
+
     await message.answer("Что ищем?", keyboard=get_map_filter_kb())
 
 
-@bl.message(text="♻️ Переработка")
-async def show_recycling(message: Message):
-    # Получаем точки из БД
-    points = await db.queries.get_eco_points(db.conn, category='recycle')
+@bl.message(config=None, text="♻️ Переработка")
+async def show_recycling(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user or not user.location:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+
+    points = await cache.get_or_create_points(user.location)
+    points = points['recycling']
 
     if not points:
         await message.answer("Точек пока нет в базе.")
@@ -27,9 +63,22 @@ async def show_recycling(message: Message):
     await message.answer(response)
 
 
-@bl.message(text="📅 Мероприятия")
-async def show_events(message: Message):
-    points = await db.queries.get_eco_points(db.conn, category='event')
+@bl.message(config=None, text="📅 Мероприятия")
+async def show_events(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user or not user.location:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+
+    points = await cache.get_or_create_points(user.location)
+    points = points['event']
+
+    if not points:
+        await message.answer("Точек пока нет в базе.")
+        return
+    
     response = "🌿 Эко-события:\n\n"
     for p in points:
         response += f"🎉 {p['name']}\nℹ️ {p['description']}\n\n"
