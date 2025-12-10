@@ -123,19 +123,24 @@ cd eco-bot
 
 ### Шаг 3️⃣: Создание виртуального окружения
 
-**Windows (CMD):**
 ```bash
 # Создание виртуального окружения
 python -m venv venv
-
-# Активация окружения
-venv\Scripts\activate
 ```
 
-**Windows (PowerShell):**
-```bash
-python -m venv venv
+**Windows:**
+```
+# Активация окружения - CMD
+venv\Scripts\activate
+```
+```
+# Активация окружения - PowerShell
 .\venv\Scripts\Activate.ps1
+```
+
+**Linux**
+```
+source .venv/bin/activate
 ```
 
 ---
@@ -143,7 +148,6 @@ python -m venv venv
 ### Шаг 4️⃣: Установка зависимостей
 
 ```bash
-# После активации venv выполни:
 pip install -r requirements.txt
 ```
 
