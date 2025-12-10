@@ -96,6 +96,19 @@ python --version
 pip --version
 ```
 
+**Debian / Ubuntu / Mint:**
+```
+sudo apt update && sudo apt install python3 python3-pip
+```
+Fedora / CentOS / RHEL (с dnf):
+```
+sudo dnf install python3
+```
+Arch Linux / Manjaro:
+```
+sudo pacman -S python
+```
+
 ---
 
 ### Шаг 2️⃣: Клонирование репозитория
