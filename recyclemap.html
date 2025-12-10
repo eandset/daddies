@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c3caacc80310e8ddbd1340063d976961 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css"/>
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_c3caacc80310e8ddbd1340063d976961" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c3caacc80310e8ddbd1340063d976961 = L.map(
+                "map_c3caacc80310e8ddbd1340063d976961",
+                {
+                    center: [55.7558, 37.6176],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 10,
+  "zoomControl": true,
+  "preferCanvas": false,
+  "zoomstart": 14,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_6cfc8af0d45b1915dbe82e39f987217d = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_6cfc8af0d45b1915dbe82e39f987217d.addTo(map_c3caacc80310e8ddbd1340063d976961);
+        
+    
+            var marker_c605ff83726c677349875dfc93f1c9fe = L.marker(
+                [55.7558, 37.6176],
+                {
+}
+            ).addTo(map_c3caacc80310e8ddbd1340063d976961);
+        
+    
+            var icon_83b1169f6f9a45aa2c49ed3959d093e5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "user",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ada3304a486867214f406a436a928320 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_0abcee1938365c5e6b6f1c9313a314cf = $(`<div id="html_0abcee1938365c5e6b6f1c9313a314cf" style="width: 100.0%; height: 100.0%;">Вы здесь</div>`)[0];
+                popup_ada3304a486867214f406a436a928320.setContent(html_0abcee1938365c5e6b6f1c9313a314cf);
+            
+        
+
+        marker_c605ff83726c677349875dfc93f1c9fe.bindPopup(popup_ada3304a486867214f406a436a928320)
+        ;
+
+        
+    
+    
+                marker_c605ff83726c677349875dfc93f1c9fe.setIcon(icon_83b1169f6f9a45aa2c49ed3959d093e5);
+            
+    
+            var marker_cluster_9d972f7ff51b83d41af771808c9bb006 = L.markerClusterGroup(
+                {
+}
+            );
+        
+    
+            var marker_4c97c4f0ce99ea11a81f1c3cf8b59ad2 = L.marker(
+                [55.7553879, 37.6233132],
+                {
+}
+            ).addTo(marker_cluster_9d972f7ff51b83d41af771808c9bb006);
+        
+    
+            var icon_2f0c779a5b53370dfd323de1d0a351e8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkgreen",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_89383d35a4387739453f7d235ba4861b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_077356ddca4a12a18075ceae92d52917 = $(`<div id="html_077356ddca4a12a18075ceae92d52917" style="width: 100.0%; height: 100.0%;">— (recycling)<br>362 м<br><a href='https://www.openstreetmap.org/node/4333930177' target='_blank'>OSM</a></div>`)[0];
+                popup_89383d35a4387739453f7d235ba4861b.setContent(html_077356ddca4a12a18075ceae92d52917);
+            
+        
+
+        marker_4c97c4f0ce99ea11a81f1c3cf8b59ad2.bindPopup(popup_89383d35a4387739453f7d235ba4861b)
+        ;
+
+        
+    
+    
+                marker_4c97c4f0ce99ea11a81f1c3cf8b59ad2.setIcon(icon_2f0c779a5b53370dfd323de1d0a351e8);
+            
+    
+            var marker_4ce70ae099e65ef19f4d81f5f2d036c7 = L.marker(
+                [55.7544215, 37.60957],
+                {
+}
+            ).addTo(marker_cluster_9d972f7ff51b83d41af771808c9bb006);
+        
+    
+            var icon_6d21631aef05c1abdde7a321179003b5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkgreen",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ca377069cd2737cb8a13d46417a8b39b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_c17fffc0aac8a5637ade7fa0264cb4b6 = $(`<div id="html_c17fffc0aac8a5637ade7fa0264cb4b6" style="width: 100.0%; height: 100.0%;">— (recycling)<br>527 м<br><a href='https://www.openstreetmap.org/node/11018711005' target='_blank'>OSM</a></div>`)[0];
+                popup_ca377069cd2737cb8a13d46417a8b39b.setContent(html_c17fffc0aac8a5637ade7fa0264cb4b6);
+            
+        
+
+        marker_4ce70ae099e65ef19f4d81f5f2d036c7.bindPopup(popup_ca377069cd2737cb8a13d46417a8b39b)
+        ;
+
+        
+    
+    
+                marker_4ce70ae099e65ef19f4d81f5f2d036c7.setIcon(icon_6d21631aef05c1abdde7a321179003b5);
+            
+    
+            var marker_347147b00e5c7a214f6325ee32d5871a = L.marker(
+                [55.7614815, 37.6228215],
+                {
+}
+            ).addTo(marker_cluster_9d972f7ff51b83d41af771808c9bb006);
+        
+    
+            var icon_d140ce6c1a3f36b5883b7f687e10fa03 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkgreen",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_332ff1f985cb05efb77892d2a542c8a4 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2d017e6f0839951bcdd3577bfb9bfba2 = $(`<div id="html_2d017e6f0839951bcdd3577bfb9bfba2" style="width: 100.0%; height: 100.0%;">— (recycling)<br>712 м<br><a href='https://www.openstreetmap.org/node/3026682702' target='_blank'>OSM</a></div>`)[0];
+                popup_332ff1f985cb05efb77892d2a542c8a4.setContent(html_2d017e6f0839951bcdd3577bfb9bfba2);
+            
+        
+
+        marker_347147b00e5c7a214f6325ee32d5871a.bindPopup(popup_332ff1f985cb05efb77892d2a542c8a4)
+        ;
+
+        
+    
+    
+                marker_347147b00e5c7a214f6325ee32d5871a.setIcon(icon_d140ce6c1a3f36b5883b7f687e10fa03);
+            
+    
+            marker_cluster_9d972f7ff51b83d41af771808c9bb006.addTo(map_c3caacc80310e8ddbd1340063d976961);
+        
+</script>
+</html>

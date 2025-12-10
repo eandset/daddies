@@ -1,5 +1,6 @@
 import asyncio
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
+import json
 
 from database.database import Database
 from database.models import User, Chat
@@ -11,8 +12,8 @@ class CacheManager:
 
         self.users: Dict[int, User] = {}
         self.chats: Dict[int, Chat] = {}
-        self.tops: list = []
-        self.points: Dict[str, Any]
+        self.tops: List[int] = []
+        self.points: Dict[str, Any] = {}
 
         self.lock_points: Dict[str, asyncio.Lock] = {}
 
@@ -37,29 +38,34 @@ class CacheManager:
     def update_tops(self, user: User) -> bool:
         topers = self.tops
 
-        if topers == []:
-            return self.tops.append(user.user_id)
+        if not topers:  # Более питонический способ проверки пустого списка
+            self.tops.append(user.user_id)
+            return True
 
+        # Проверяем, что пользователь существует в кэше
+        if not self.get_user(user.user_id):
+            self.users[user.user_id] = user
+
+        # Проверяем, есть ли пользователь уже в топе
+        if user.user_id in topers:
+            topers.remove(user.user_id)
+
+        inserted = False
         for i, toper in enumerate(topers):
-            if self.get_user(toper).score < user.score:
+            toper_user = self.get_user(toper)
+            if toper_user and user.score > toper_user.score:
                 topers.insert(i, user.user_id)
+                inserted = True
                 break
+        
+        if not inserted:
+            topers.append(user.user_id)
                 
         self.tops = topers[:10]
+        return True
 
-    def get_tops(self) -> list:
+    def get_tops(self) -> List[int]:
         return self.tops
-
-    async def get_or_create_points(self, location: str):
-        if location not in self.points:
-            if location not in self.lock_points:
-                self.lock_points[location] = asyncio.Lock()
-
-            async with self.lock_points[location]:
-                if location not in self.points:
-                    pass # Вот тут добавить как мы определяем точки
-
-        return self.points[location]
 
     async def save_data_to_db(self) -> bool:
         status = True
@@ -78,8 +84,11 @@ class CacheManager:
         return status
 
     async def get_data_from_db(self) -> bool:
-        self.chats = await self.db.get_all_chats()
-        self.users = await self.db.get_all_users()
-        self.tops = await self.db.get_tops()
-
-        return True
+        try:
+            self.chats = await self.db.get_all_chats()
+            self.users = await self.db.get_all_users()
+            self.tops = await self.db.get_tops()
+            return True
+        except Exception as e:
+            print(f"Error loading data from DB: {e}")
+            return False

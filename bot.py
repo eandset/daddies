@@ -9,7 +9,7 @@ from database import Database
 from cachemanager import CacheManager
 
 # Вставьте ваш токен или используйте os.getenv("TOKEN")
-TOKEN = "vk1.a.1ZwM1W9ZsoObwI39elAjn-ck80ijfuDT2XZzteX2Y60QrWVqsAbI6wu-efyQ0JEdvT1RmqpfqZIWIq3rYoANa5pJlN_cbz6wyw4I_qtoG8kxF0WpiHgdkaC2sXLVwRaj4tFHSq0kwwH-_nz0C8KGQf8wK6QrhDsV9vQLYYDGdfXou8s3CdzPi7Jh0WJiLRW2Cp-uR3l10oLs18DKwEHwRA"
+TOKEN = "vk1.a.5zh0zqg8PFXdRPC3XGo34ikkLt63VSqPu17iyZ-yH4BRYAeNExOstRLcsxj69qwEOyON6dpRwXaBOAJLYkVYsfyY-4cYEhOwvOy60WMquEYsHNbtY2YJt5t_vJCvDEEjGWjnGSqehhc98w306hJYFZCbhZkVYnBioDRdqWeb0xZNkEu7QuUwIF-HRD8FshXE0JdqSmJ81Qz_LPWRCy84ZQ"
 DB_PATH = "eco_bot.db"
 
 bot = Bot(token=TOKEN)

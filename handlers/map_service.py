@@ -28,14 +28,14 @@ async def write_loc(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)
 
-    if not user or not user.location:
+    if not user:
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    location = None # Определите локу
-
+    location = "40, 50"  # Заглушка, нужно реализовать получение местоположения
     user.location = location
-
+    cache.add_user(user)  # Важно обновить пользователя в кэше
+    
     await message.answer("Что ищем?", keyboard=get_map_filter_kb())
 
 
@@ -48,19 +48,13 @@ async def show_recycling(message: Message, cache: CacheManager):
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    points = await cache.get_or_create_points(user.location)
-    points = points['recycling']
-
-    if not points:
-        await message.answer("Точек пока нет в базе.")
-        return
-
-    response = "📍 Ближайшие пункты приема:\n\n"
-    for p in points:
-        response += f"🏢 {p['name']}\nℹ️ {p['description']}\n\n"
-
-    # Здесь можно добавить интеграцию с Яндекс.Картами (Static API) для генерации картинки
-    await message.answer(response)
+    try:
+        
+        # Здесь можно добавить интеграцию с Яндекс.Картами (Static API) для генерации картинки
+        await message.answer("ЗАГЛУШКА #$@#$")
+        
+    except Exception as e:
+        await message.answer(f"Произошла ошибка при получении точек: {str(e)}")
 
 
 @bl.message(config=None, text="📅 Мероприятия")
@@ -72,14 +66,49 @@ async def show_events(message: Message, cache: CacheManager):
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    points = await cache.get_or_create_points(user.location)
-    points = points['event']
+    try:
+        points_data = await cache.get_or_create_points(user.location)
+        
+        # Проверяем структуру данных
+        if 'points' in points_data:
+            points = points_data['points']
+        elif 'event' in points_data or 'events' in points_data:
+            points = points_data.get('event') or points_data.get('events', [])
+        else:
+            points = points_data
+            
+        if not points or (isinstance(points, dict) and 'points' in points and not points['points']):
+            await message.answer("Эко-событий пока нет в базе.")
+            return
 
-    if not points:
-        await message.answer("Точек пока нет в базе.")
-        return
-    
-    response = "🌿 Эко-события:\n\n"
-    for p in points:
-        response += f"🎉 {p['name']}\nℹ️ {p['description']}\n\n"
-    await message.answer(response)
+        response = "🌿 Эко-события:\n\n"
+        
+        # Обрабатываем разные форматы точек
+        if isinstance(points, dict) and 'points' in points:
+            points_list = points['points']
+        elif isinstance(points, list):
+            points_list = points
+        else:
+            points_list = [points]
+        
+        for p in points_list[:10]:  # Ограничиваем вывод 10 событиями
+            if isinstance(p, dict):
+                name = p.get('name', 'Неизвестное событие')
+                description = p.get('description', 'Описание отсутствует')
+                date = p.get('date', 'Дата не указана')
+                time = p.get('time', '')
+                
+                response += f"🎉 {name}\n"
+                if date:
+                    response += f"📅 {date}"
+                    if time:
+                        response += f" в {time}"
+                    response += "\n"
+                response += f"ℹ️ {description}\n\n"
+            else:
+                response += f"🎉 {str(p)}\n\n"
+                
+        await message.answer(response)
+        
+    except Exception as e:
+        await message.answer(f"Произошла ошибка при получении событий: {str(e)}")
