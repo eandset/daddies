@@ -1,9 +1,7 @@
-from vkbottle.bot import BotLabeler, Message, MessageEvent
-from vkbottle import GroupEventType
+from vkbottle.bot import BotLabeler, Message
 
 from keyboards.key_builders import get_map_filter_kb, write_location
 from cachemanager import CacheManager
-from rules import PayloadRule
 
 bl = BotLabeler()
 
@@ -28,13 +26,13 @@ async def write_loc(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)
 
-    if not user or not user.location:
+    if not user:
         await message.answer("Нажмите 'Начать' для регистрации.")
         return
 
-    location = None # Определите локу
+    location = [1234, 1425] # Определите локу
 
-    user.location = location
+    user.location = f'{location[0]}_{location[1]}'
 
     await message.answer("Что ищем?", keyboard=get_map_filter_kb())
 

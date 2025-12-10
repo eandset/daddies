@@ -1,10 +1,7 @@
-from vkbottle.dispatch.rules.base import ABCRule, FuncRule
+from vkbottle.dispatch.rules.base import ABCRule
 from vkbottle.bot import MessageEvent, MessageMin
 
 from start import classes
-from cachemanager import CacheManager
-from database import Database
-
 
 
 class PayloadRule(ABCRule[MessageEvent]):

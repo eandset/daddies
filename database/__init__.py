@@ -1,2 +1,2 @@
 from .database import Database
-from .models import User
+from .models import User, Chat

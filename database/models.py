@@ -5,7 +5,20 @@ import json
 
 @dataclass
 class Preference:
-    events: bool = False
+    eco_rec: int = 1
+    recycling: int = 1
+    events: int = 0
+    shop: int = 0
+
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+    
+    def validate(self):
+        self.eco_rec = max(0, self.eco_rec - 1)
+        self.recycling = max(0, self.recycling - 1)
+        self.events = max(0, self.events - 1)
+        self.shop = max(0, self.shop - 1)
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Preference':
@@ -16,12 +29,20 @@ class Preference:
 @dataclass
 class TodayDone:
     eco_rec: bool = False
+    recycling: bool = False
+    events: bool = False
+    shop: bool = False
 
     @classmethod
     def from_dict(cls, data: dict) -> 'TodayDone':
         """Создание TodayDone из словаря"""
         return cls(**{k: v for k, v in data.items() if k in cls.__annotations__})
-
+    
+    def validate(self):
+        self.eco_rec = False
+        self.recycling = False
+        self.events = False
+        self.shop = False
 
 @dataclass
 class User:
@@ -50,8 +71,8 @@ class User:
     def from_dict(cls, data: dict) -> 'User':
         """Создание User из словаря"""
         # Обрабатываем вложения
-        if 'preference' in data and isinstance(data['preference'], dict):
-            data['preference'] = Preference.from_dict(data['preference'])
+        if 'preferences' in data and isinstance(data['preferences'], dict):
+            data['preferences'] = Preference.from_dict(data['preferences'])
 
         if 'today_done' in data and isinstance(data['today_done'], dict):
             data['today_done'] = TodayDone.from_dict(data['today_done'])
@@ -80,7 +101,7 @@ class User:
         if self.user_chats is None:
             self.user_chats = set()
         if self.preferences is None:
-            self.preference = Preference()
+            self.preferences = Preference()
 
 
 @dataclass

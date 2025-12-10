@@ -1,13 +1,12 @@
 import random
 
-from vkbottle.bot import BotLabeler, Message, Bot, MessageEvent
-from vkbottle import GroupEventType, BaseStateGroup, GroupTypes
+from vkbottle.bot import BotLabeler, Message, Bot, MessageMin
+from vkbottle import BaseStateGroup
 
-from database import Database, User
+from database import User
+from app.auto_notifications import AutoNotifivator
 from cachemanager import CacheManager
-from keyboards.key_builders import get_main_menu, get_name_accept
-from rules import PayloadRule
-
+from keyboards.key_builders import get_main_menu, get_name_accept, settings_kb
 
 bl = BotLabeler()
 
@@ -44,10 +43,15 @@ async def start_handler(message: Message, bot: Bot, cache: CacheManager):
 @bl.message(config=None, state=SuperStates.NAME_STATE)
 async def write_name(message: Message, cache: CacheManager, bot: Bot):
     name = message.text
-    user_info = await message.get_user()
     chat_id = message.chat_id
 
-    cache.add_user(User(user_id=user_info.id, user_name=name, user_chats={chat_id}))
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        cache.add_user(User(user_id=user_info.id, user_name=name, user_chats={chat_id}))
+    else:
+        user.user_name = name
 
     await bot.state_dispenser.delete(message.peer_id)
 
@@ -90,8 +94,72 @@ async def tip_handler(message: Message, cache: CacheManager):
     # Геймификация: начисляем 1 балл за интерес
     if user.today_done.eco_rec == False:
         user.today_done.eco_rec = True
+        user.preferences.eco_rec += 2
         user.score += 1
         cache.update_tops(user)
 
     tip = random.choice(ECO_TIPS)
-    await message.answer(f"💡 Совет дня:\n\n<b>{tip}</b>", disable_mentions=1)
+    await message.answer(f"💡 Совет дня:\n\n{tip}", disable_mentions=1)
+
+
+@bl.message(config=None, text="⚙️ Настройки")
+async def tip_handler(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+
+    await message.answer("Настройки аккаунта:", keyboard=settings_kb(user.notification))
+
+
+@bl.message(config=None, payload={'command': 'change_name'})
+async def change_name_button(message: MessageMin, cache: CacheManager, bot: Bot):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+    
+    await bot.state_dispenser.set(message.peer_id, SuperStates.NAME_STATE)
+    await message.answer('Введите новое имя')
+
+
+@bl.message(config=None, payload={'command': 'location'})
+async def change_location_button(message: MessageMin, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+    
+    location = None # Определите локу
+
+    user.location = location
+
+    await message.answer("Вы обновили местоположение")
+
+
+@bl.message(config=None, payload={'command': 'notification'})
+async def change_notificatiion_button(message: MessageMin, cache: CacheManager):
+    user_info = await message.get_user()
+    user = cache.get_user(user_info.id)
+
+    if not user:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
+    
+    
+    user.notification = not user.notification
+
+    await message.answer('Статус уведомлений изменён', keyboard=settings_kb(user.notification))
+
+
+@bl.message(config=None, payload={'command': 'update'})
+async def change_notificatiion_button(message: MessageMin, autonote: AutoNotifivator):
+    await autonote.stop()
+    autonote.start()
+    await message.answer('Перезапустили авто-уведомления. Предпочтения:')

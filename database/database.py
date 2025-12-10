@@ -182,7 +182,7 @@ class Database:
                     try:
                         user_data['today_done'] = json.loads(today_json) if today_json else {}
                     except json.JSONDecodeError:
-                        user_data['preferences'] = {}
+                        user_data['today_done'] = {}
 
                     users[user_id] = User.from_dict(user_data)
                 return users
