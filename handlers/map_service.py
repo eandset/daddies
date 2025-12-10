@@ -8,7 +8,7 @@ from rules import PayloadRule
 bl = BotLabeler()
 
 
-@bl.message(text="🗺 Карта эко-точек")
+@bl.message(config=None, text="🗺 Карта эко-точек")
 async def map_menu(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)
@@ -23,18 +23,23 @@ async def map_menu(message: Message, cache: CacheManager):
         await message.answer('Необходимо обновить местоположение', keyboard=write_location())
 
 
-@bl.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent, PayloadRule('command', 'write_lovation'))
-async def write_location(event: MessageEvent, cache: CacheManager):
-    user_info = event.user_id
+@bl.message(config=None, text='Обновить')
+async def write_loc(message: Message, cache: CacheManager):
+    user_info = await message.get_user()
     user = cache.get_user(user_info.id)
+
+    if not user or not user.location:
+        await message.answer("Нажмите 'Начать' для регистрации.")
+        return
 
     location = None # Определите локу
 
     user.location = location
 
-    await event.edit_message("Что ищем?", keyboard=get_map_filter_kb())
+    await message.answer("Что ищем?", keyboard=get_map_filter_kb())
 
-@bl.message(text="♻️ Переработка")
+
+@bl.message(config=None, text="♻️ Переработка")
 async def show_recycling(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)
@@ -58,7 +63,7 @@ async def show_recycling(message: Message, cache: CacheManager):
     await message.answer(response)
 
 
-@bl.message(text="📅 Мероприятия")
+@bl.message(config=None, text="📅 Мероприятия")
 async def show_events(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)

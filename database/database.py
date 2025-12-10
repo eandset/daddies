@@ -71,7 +71,8 @@ class Database:
                 ))
                 await db.commit()
                 return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     async def get_user(self, user_id: int, *fields: str) -> Union[Optional[Dict[str, Any]], User]:
@@ -91,10 +92,10 @@ class Database:
         # Если поля не указаны - получаем все для объекта User
         if return_object:
             fields = ("user_id", "user_name", "user_chats", "preferences",
-                      "location", "score", "today_done" "notification")
+                      "location", "score", "today_done", "notification")
 
         allowed_fields = ("user_id", "user_name", "user_chats", "preferences",
-                          "location", "score", "today_done" "notification")
+                          "location", "score", "today_done", "notification")
 
         for field in fields:
             if field not in allowed_fields:
@@ -152,7 +153,7 @@ class Database:
         """
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute(
-                    "SELECT user_id, user_name, user_chats, preferences, location, score, today_done notification FROM users"
+                    "SELECT user_id, user_name, user_chats, preferences, location, score, today_done, notification FROM users"
             ) as cursor:
                 users = {}
 
@@ -184,7 +185,6 @@ class Database:
                         user_data['preferences'] = {}
 
                     users[user_id] = User.from_dict(user_data)
-
                 return users
 
     async def save_chat(self, chat: Chat):
@@ -201,7 +201,8 @@ class Database:
                 ))
                 await db.commit()
                 return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     async def get_chat(self, chat_id: int) -> Optional[Chat]:
@@ -256,11 +257,12 @@ class Database:
                 await conn.commit()
                 return True
             except Exception as e:
+                print(e)
                 await conn.rollback()
                 return False
 
     async def get_tops(self) -> list:
-        """Получить текущий список user_ids."""
+        """Получить текущий список tops."""
         async with aiosqlite.connect(self.db_path) as conn:  # Исправлено: aiosqlite вместо sqlite3
             async with conn.execute('SELECT user_ids FROM tops WHERE id = 1') as cursor:
                 data = await cursor.fetchone()

@@ -3,20 +3,22 @@ import asyncio
 
 from vkbottle import Bot
 
+from start import classes
+from rules import ConfigRule
 from database import Database
 from cachemanager import CacheManager
 
-# Импорт обработчиков
-from handlers import general, map_service, gamification
-
 # Вставьте ваш токен или используйте os.getenv("TOKEN")
-TOKEN = "vk1.a.e0gXIlAOeoDFpNkkUrnZEu2ctKjZbAowpZd8JoToQmRMO_xEluC9p7zdLzoVgjgLt5eh-E5LUzpwz3URFmVk41MqKMAZdBcw2BGRB1ltlPFf6mf6DP-KQOmarnRhrCKJxvpoYG2nFafCkFYI-BIciHbltJ8vO9yLEgouBaO6qUR3XseSFyTL8BpSZTW-VHISXwdvPf3J_85QFHwATCmUng"
+TOKEN = "vk1.a.1ZwM1W9ZsoObwI39elAjn-ck80ijfuDT2XZzteX2Y60QrWVqsAbI6wu-efyQ0JEdvT1RmqpfqZIWIq3rYoANa5pJlN_cbz6wyw4I_qtoG8kxF0WpiHgdkaC2sXLVwRaj4tFHSq0kwwH-_nz0C8KGQf8wK6QrhDsV9vQLYYDGdfXou8s3CdzPi7Jh0WJiLRW2Cp-uR3l10oLs18DKwEHwRA"
 DB_PATH = "eco_bot.db"
 
 bot = Bot(token=TOKEN)
 
 
 def setup_labelers():
+    # Импорт обработчиков
+    from handlers import general, map_service, gamification
+
     # Подключаем модули с логикой
     bot.labeler.load(general.bl)
     bot.labeler.load(map_service.bl)
@@ -32,25 +34,29 @@ async def startup_task(cache: CacheManager):
 async def shutdown_task(cache: CacheManager):
     """Действия при остановке"""
     print("💤 Отключение...")
-    await cache.save_data_to_db()
+    if await cache.save_data_to_db():
+        print('Всё успешно сохранилось в бд!')
+    else:
+        print('Что-то не сохранилось в бд!')
 
 
 if __name__ == "__main__":
     bot.labeler.vbml_ignore_case = True
 
-    # Создаём экземпляры ключевых классов
+    # Создаём ключевые классы
     db = Database(DB_PATH)
     cache = CacheManager(db)
 
-    # Даём хендлерам доступ к экземпляром классов
-    bot.labeler.custom_rules['db'] = db
-    bot.labeler.custom_rules['cache'] = cache
+    classes.update_classes(db, cache, bot)
+
+    # Создаём экземпляры ключевых классов
+    bot.labeler.custom_rules['config'] = ConfigRule
 
     setup_labelers()
 
     # Регистрируем хуки запуска/остановки лупа
-    bot.loop_wrapper.on_startup.append(startup_task(cache))
-    bot.loop_wrapper.on_shutdown.append(shutdown_task(cache))
+    bot.loop_wrapper.on_startup.append(startup_task(classes.cache))
+    bot.loop_wrapper.on_shutdown.append(shutdown_task(classes.cache))
 
     # Запуск поллинга
     bot.run_forever()

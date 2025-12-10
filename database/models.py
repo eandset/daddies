@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, fields
 from typing import Optional, Set, Dict, Any
 import json
 
@@ -31,7 +31,7 @@ class User:
     preferences: Preference = field(default_factory=Preference)
     location: Optional[str] = None
     score: int = 0
-    today_done: TodayDone = field(default=TodayDone)
+    today_done: TodayDone = field(default_factory=TodayDone)
     notification: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
@@ -64,7 +64,7 @@ class User:
                 data['user_chats'] = set()
 
         # Убираем лишние ключи
-        valid_keys = {f.name for f in field(cls)}
+        valid_keys = {f.name for f in fields(cls)}
         filtered_data = {k: v for k, v in data.items() if k in valid_keys}
 
         return cls(**filtered_data)

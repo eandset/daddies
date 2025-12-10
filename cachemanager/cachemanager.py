@@ -36,12 +36,16 @@ class CacheManager:
     
     def update_tops(self, user: User) -> bool:
         topers = self.tops
+
+        if topers == []:
+            return self.tops.append(user.user_id)
+
         for i, toper in enumerate(topers):
             if self.get_user(toper).score < user.score:
                 topers.insert(i, user.user_id)
                 break
-        
-        self.tops = toper[:10]
+                
+        self.tops = topers[:10]
 
     def get_tops(self) -> list:
         return self.tops
@@ -60,11 +64,11 @@ class CacheManager:
     async def save_data_to_db(self) -> bool:
         status = True
 
-        for k, user in self.users.keys():
+        for user in self.users.values():
             if not await self.db.save_user(user):
                 status = False
 
-        for k, chat in self.chats.keys():
+        for chat in self.chats.values():
             if not await self.db.save_chat(chat):
                 status = False
 

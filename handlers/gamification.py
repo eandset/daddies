@@ -3,8 +3,7 @@ from cachemanager import CacheManager
 
 bl = BotLabeler()
 
-
-@bl.message(text="👤 Профиль")
+@bl.message(config=None, text="👤 Профиль")
 async def profile_handler(message: Message, cache: CacheManager):
     user_info = await message.get_user()
     user = cache.get_user(user_info.id)
@@ -21,7 +20,7 @@ async def profile_handler(message: Message, cache: CacheManager):
     await message.answer(text)
 
 
-@bl.message(text="🏆 Рейтинг")
+@bl.message(config=None, text="🏆 Рейтинг")
 async def rating_handler(message: Message, cache: CacheManager):
     top_users = cache.get_tops()
 
