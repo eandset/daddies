@@ -1,12 +1,11 @@
-import os
-import asyncio
-
 from vkbottle import Bot
 
 from start import classes
 from rules import ConfigRule
 from database import Database
 from cachemanager import CacheManager
+from app.overpass_integration import OverpassIntegration
+from app.auto_notifications import AutoNotifivator
 
 # Вставьте ваш токен или используйте os.getenv("TOKEN")
 TOKEN = "vk1.a.1ZwM1W9ZsoObwI39elAjn-ck80ijfuDT2XZzteX2Y60QrWVqsAbI6wu-efyQ0JEdvT1RmqpfqZIWIq3rYoANa5pJlN_cbz6wyw4I_qtoG8kxF0WpiHgdkaC2sXLVwRaj4tFHSq0kwwH-_nz0C8KGQf8wK6QrhDsV9vQLYYDGdfXou8s3CdzPi7Jh0WJiLRW2Cp-uR3l10oLs18DKwEHwRA"
@@ -25,38 +24,47 @@ def setup_labelers():
     bot.labeler.load(gamification.bl)
 
 
-async def startup_task(cache: CacheManager):
+async def startup_task(cache: CacheManager, autonote: AutoNotifivator):
     """Действия при запуске бота"""
     print("🚀 Запуск Эко-бота...")
+
     await cache.get_data_from_db()
 
+    autonote.start()
 
-async def shutdown_task(cache: CacheManager):
+
+async def shutdown_task(cache: CacheManager, autonote: AutoNotifivator):
     """Действия при остановке"""
     print("💤 Отключение...")
+
     if await cache.save_data_to_db():
         print('Всё успешно сохранилось в бд!')
     else:
         print('Что-то не сохранилось в бд!')
+    
+    await autonote.stop()
 
 
 if __name__ == "__main__":
     bot.labeler.vbml_ignore_case = True
 
-    # Создаём ключевые классы
-    db = Database(DB_PATH)
-    cache = CacheManager(db)
-
-    classes.update_classes(db, cache, bot)
-
     # Создаём экземпляры ключевых классов
+    db = Database(DB_PATH)
+    overpass = OverpassIntegration()
+    cache = CacheManager(db, overpass)
+    autonote = AutoNotifivator(bot, cache)
+
+    # Создаём класс и правило для простого доступа
+    classes.update_classes(db, cache, bot, autonote)
+
     bot.labeler.custom_rules['config'] = ConfigRule
 
+    # Регестрируем хендлеры
     setup_labelers()
 
     # Регистрируем хуки запуска/остановки лупа
-    bot.loop_wrapper.on_startup.append(startup_task(classes.cache))
-    bot.loop_wrapper.on_shutdown.append(shutdown_task(classes.cache))
+    bot.loop_wrapper.on_startup.append(startup_task(classes.cache, classes.autonote))
+    bot.loop_wrapper.on_shutdown.append(shutdown_task(classes.cache, classes.autonote))
 
     # Запуск поллинга
     bot.run_forever()

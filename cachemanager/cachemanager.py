@@ -1,18 +1,20 @@
 import asyncio
 from typing import Dict, Optional, Any
 
-from database.database import Database
-from database.models import User, Chat
+from database import Database
+from database import User, Chat
+from app.overpass_integration import OverpassIntegration
 
 
 class CacheManager:
-    def __init__(self, database: Database):
+    def __init__(self, database: Database, overpass: OverpassIntegration):
         self.db = database
+        self.ov = overpass
 
         self.users: Dict[int, User] = {}
         self.chats: Dict[int, Chat] = {}
         self.tops: list = []
-        self.points: Dict[str, Any]
+        self.points: Dict[str, Any] = {}
 
         self.lock_points: Dict[str, asyncio.Lock] = {}
 
@@ -22,6 +24,7 @@ class CacheManager:
 
     def get_user(self, user_id: int) -> Optional[User]:
         if user_id in self.users:
+            print(self.users[user_id])
             return self.users[user_id]
         return None
 
@@ -57,8 +60,12 @@ class CacheManager:
 
             async with self.lock_points[location]:
                 if location not in self.points:
-                    pass # Вот тут добавить как мы определяем точки
+                    parts = location.split('_')
+                    lat = parts[0]
+                    lon = parts[1]
 
+                    points = await self.ov.find_eco_points(lat, lon)
+                    self.points[location] = points
         return self.points[location]
 
     async def save_data_to_db(self) -> bool:
